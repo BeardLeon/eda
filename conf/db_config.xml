@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<db_config>
+    <db_base db_base_index="0">
+        <db_type>mongodb</db_type>
+        <username>root</username>
+        <password>Metadata0!</password>
+        <ip_protocol>tcp</ip_protocol>
+        <ip_address>localhost</ip_address>
+        <port>27017</port>
+        <db_name>eda</db_name>
+        <table_name>file</table_name>
+    </db_base>
+</db_config>
