@@ -2,12 +2,12 @@ package http_server
 
 import (
 	"database/sql"
+	"eda/src/config"
+	"eda/src/dbops"
+	"eda/src/edaPkg"
+	"eda/src/zaplog"
 	"fmt"
 	"go.uber.org/zap"
-	"golang-template/src/config"
-	"golang-template/src/dbops"
-	"golang-template/src/http_handler"
-	"golang-template/src/zaplog"
 	"net/http"
 )
 
@@ -17,7 +17,7 @@ type Server struct {
 	DBConfig    config.DBConfig
 	DirDBConfig string
 	DB          *sql.DB
-	EdaHandler  http_handler.EdaHandler
+	EdaPkg      edaPkg.EdaPkg
 }
 
 var Logger = zaplog.Logger
@@ -30,19 +30,20 @@ func (server *Server) Init() {
 	dbConfigInfo0 := server.DBConfig.DbBase
 
 	var dbOps dbops.DBOps
-	dataSourceName := fmt.Sprintf("%s:%s@%s(%s:%s)/%s", dbConfigInfo0.Username,
-		dbConfigInfo0.Password, dbConfigInfo0.IPProtocol,
-		dbConfigInfo0.IPAddress, dbConfigInfo0.Port, dbConfigInfo0.DBName)
-	driverName := dbConfigInfo0.DBType
+	dataSourceName := fmt.Sprintf("%s://%s:%s", dbConfigInfo0.DBType,
+		dbConfigInfo0.IPAddress, dbConfigInfo0.Port)
 
-	dbOps.Init(driverName, dataSourceName, dbConfigInfo0.TableName)
+	dbOps.Init(dataSourceName, dbConfigInfo0.DBName, dbConfigInfo0.TableName)
 
 }
 
 func (server *Server) RegisterHttpHandler() {
 	// All the handler func map for request from client
 	var requestHandlers = map[string]func(http.ResponseWriter, *http.Request){
-		"/import": server.importJsonFile,
+		"/import":    server.importJsonFile,
+		"/export":    server.exportJsonFile,
+		"/line":      server.line,
+		"/component": server.component,
 	}
 	for k := range requestHandlers {
 		http.HandleFunc(k, requestHandlers[k])
@@ -51,5 +52,20 @@ func (server *Server) RegisterHttpHandler() {
 
 func (server *Server) importJsonFile(writer http.ResponseWriter, req *http.Request) {
 	Logger.Info("importJsonFile()", zap.Any("http.Request", *req))
-	server.EdaHandler.ImportJsonFile(writer, req)
+	server.EdaPkg.ImportJsonFile(writer, req)
+}
+
+func (server *Server) exportJsonFile(writer http.ResponseWriter, req *http.Request) {
+	Logger.Info("exportJsonFile()", zap.Any("http.Request", *req))
+	server.EdaPkg.ExportJsonFile(writer, req)
+}
+
+func (server *Server) line(writer http.ResponseWriter, req *http.Request) {
+	Logger.Info("line()", zap.Any("http.Request", *req))
+	server.EdaPkg.Line(writer, req)
+}
+
+func (server *Server) component(writer http.ResponseWriter, req *http.Request) {
+	Logger.Info("component()", zap.Any("http.Request", *req))
+	server.EdaPkg.Component(writer, req)
 }

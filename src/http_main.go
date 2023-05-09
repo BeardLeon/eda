@@ -1,9 +1,9 @@
 package src
 
 import (
+	server "eda/src/http_server"
+	_ "eda/src/zaplog"
 	"fmt"
-	server "golang-template/src/http_server"
-	_ "golang-template/src/zaplog"
 	"log"
 	"net/http"
 	"os"
