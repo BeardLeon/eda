@@ -11,12 +11,13 @@ var dbops DBOps
 var dataSourceName string = fmt.Sprintf("%s://%s:%s", "mongodb",
 	"localhost", "27017")
 
+var coll string = "final"
+
 func TestInit(t *testing.T) {
-	dbops.Init(dataSourceName, "eda", "file")
+	dbops.Init(dataSourceName, "eda", coll)
 }
 
 func TestInsertLine(t *testing.T) {
-	dbops.Init(dataSourceName, "eda", "file")
 	line := edaPkg.Line{
 		StartX: 2,
 		StartY: 2,
@@ -27,7 +28,6 @@ func TestInsertLine(t *testing.T) {
 }
 
 func TestDeleteLine(t *testing.T) {
-	dbops.Init(dataSourceName, "eda", "file")
 	line := edaPkg.Line{
 		StartX: 2,
 		StartY: 2,
@@ -38,7 +38,6 @@ func TestDeleteLine(t *testing.T) {
 }
 
 func TestUpdateLine(t *testing.T) {
-	dbops.Init(dataSourceName, "eda", "file")
 	curLine := edaPkg.Line{
 		StartX: 3,
 		StartY: 3,
@@ -55,7 +54,6 @@ func TestUpdateLine(t *testing.T) {
 }
 
 func TestInsertComponent(t *testing.T) {
-	dbops.Init(dataSourceName, "eda", "file")
 	component := edaPkg.Component{
 		Id:   8,
 		Name: "Good test name",
@@ -75,11 +73,10 @@ func TestInsertComponent(t *testing.T) {
 			{X: 3, Y: 3},
 		},
 	}
-	dbops.InsertComponent("GoodTitle", component)
+	dbops.InsertComponent(component)
 }
 
 func TestDeleteComponent(t *testing.T) {
-	dbops.Init(dataSourceName, "eda", "file")
 	component := edaPkg.Component{
 		Id:   8,
 		Name: "Good test name",
@@ -99,11 +96,10 @@ func TestDeleteComponent(t *testing.T) {
 			{X: 3, Y: 3},
 		},
 	}
-	dbops.DeleteComponent("GoodTitle", component)
+	dbops.DeleteComponent(component)
 }
 
 func TestUpdateComponent(t *testing.T) {
-	dbops.Init(dataSourceName, "eda", "file")
 	preComponent := edaPkg.Component{
 		Id:   8,
 		Name: "Good test name",
@@ -142,5 +138,42 @@ func TestUpdateComponent(t *testing.T) {
 			{X: 4, Y: 4},
 		},
 	}
-	dbops.UpdateComponent("GoodTitle", preComponent, curComponent)
+	dbops.UpdateComponent(preComponent, curComponent)
+}
+
+func TestCreateFile(t *testing.T) {
+	dbops.CreateFile("soso title", "this is a soso desc")
+}
+
+func TestDBOps(t *testing.T) {
+	dbops.Init(dataSourceName, "eda", coll)
+	dbops.CreateFile("soso title", "this is a soso desc")
+	component := edaPkg.Component{
+		Id:   8,
+		Name: "Good test name",
+		Shape: []edaPkg.Line{
+			{StartX: 2,
+				StartY: 2,
+				EndX:   2,
+				EndY:   2,
+			},
+			{StartX: 3,
+				StartY: 3,
+				EndX:   3,
+				EndY:   3},
+		},
+		Pin: []edaPkg.Coordinate{
+			{X: 0, Y: 0},
+			{X: 3, Y: 3},
+		},
+	}
+	dbops.InsertComponent(component)
+
+	line := edaPkg.Line{
+		StartX: 2,
+		StartY: 2,
+		EndX:   2,
+		EndY:   2,
+	}
+	dbops.InsertLine("GoodTitle", line)
 }

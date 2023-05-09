@@ -2,8 +2,8 @@ package dbops
 
 import (
 	"context"
+	"eda/src/common"
 	"eda/src/config"
-	"eda/src/edaPkg"
 	"eda/src/zaplog"
 	"github.com/qiniu/qmgo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -23,7 +23,8 @@ var dbConfigInfo = DBConfigInfoStruct{
 }
 
 type DBOps struct {
-	cli *qmgo.QmgoClient
+	InsertId interface{}
+	cli      *qmgo.QmgoClient
 	// DBInfo struct
 	DBConfig *config.DBConfig
 }
@@ -48,9 +49,9 @@ func (ops *DBOps) GetCli() *qmgo.QmgoClient {
 	return ops.cli
 }
 
-func (ops *DBOps) InsertLine(title string, line edaPkg.Line) {
+func (ops *DBOps) InsertLine(line common.Line) {
 	ctx := context.Background()
-	err := ops.GetCli().UpdateOne(ctx, bson.M{"title": title},
+	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": ops.InsertId},
 		bson.M{"$push": bson.M{"lines": bson.M{
 			"sx": line.StartY,
 			"sy": line.StartY,
@@ -59,13 +60,13 @@ func (ops *DBOps) InsertLine(title string, line edaPkg.Line) {
 		}})
 	if err != nil {
 		Logger.Error("insert line", zap.Error(err),
-			zap.Any("title", title), zap.Any("line", line))
+			zap.Any("_id", ops.InsertId), zap.Any("line", line))
 	}
 }
 
-func (ops *DBOps) DeleteLine(title string, line edaPkg.Line) {
+func (ops *DBOps) DeleteLine(line common.Line) {
 	ctx := context.Background()
-	err := ops.GetCli().UpdateOne(ctx, bson.M{"title": title},
+	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": ops.InsertId},
 		bson.M{"$pull": bson.M{"lines": bson.M{
 			"sx": line.StartY,
 			"sy": line.StartY,
@@ -74,19 +75,19 @@ func (ops *DBOps) DeleteLine(title string, line edaPkg.Line) {
 		}})
 	if err != nil {
 		Logger.Error("delete line", zap.Error(err),
-			zap.Any("title", title), zap.Any("line", line))
+			zap.Any("_id", ops.InsertId), zap.Any("line", line))
 	}
 }
 
-func (ops *DBOps) UpdateLine(title string, preLine, curLine edaPkg.Line) {
-	ops.DeleteLine(title, preLine)
-	ops.InsertLine(title, curLine)
+func (ops *DBOps) UpdateLine(preLine, curLine common.Line) {
+	ops.DeleteLine(preLine)
+	ops.InsertLine(curLine)
 }
 
-func (ops *DBOps) InsertComponent(title string, component edaPkg.Component) {
+func (ops *DBOps) InsertComponent(component common.Component) {
 	ctx := context.Background()
-	err := ops.GetCli().UpdateOne(ctx, bson.M{"title": title},
-		bson.M{"$push": bson.M{"component": bson.M{
+	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": ops.InsertId},
+		bson.M{"$push": bson.M{"components": bson.M{
 			"id":    component.Id,
 			"name":  component.Name,
 			"shape": component.Shape,
@@ -94,14 +95,14 @@ func (ops *DBOps) InsertComponent(title string, component edaPkg.Component) {
 		}}})
 	if err != nil {
 		Logger.Error("insert component", zap.Error(err),
-			zap.Any("title", title), zap.Any("component", component))
+			zap.Any("_id", ops.InsertId), zap.Any("component", component))
 	}
 }
 
-func (ops *DBOps) DeleteComponent(title string, component edaPkg.Component) {
+func (ops *DBOps) DeleteComponent(component common.Component) {
 	ctx := context.Background()
-	err := ops.GetCli().UpdateOne(ctx, bson.M{"title": title},
-		bson.M{"$pull": bson.M{"component": bson.M{
+	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": ops.InsertId},
+		bson.M{"$pull": bson.M{"components": bson.M{
 			"id":    component.Id,
 			"name":  component.Name,
 			"shape": component.Shape,
@@ -109,11 +110,29 @@ func (ops *DBOps) DeleteComponent(title string, component edaPkg.Component) {
 		}}})
 	if err != nil {
 		Logger.Error("delete component", zap.Error(err),
-			zap.Any("title", title), zap.Any("component", component))
+			zap.Any("_id", ops.InsertId), zap.Any("component", component))
 	}
 }
 
-func (ops *DBOps) UpdateComponent(title string, preComponent, curComponent edaPkg.Component) {
-	ops.DeleteComponent(title, preComponent)
-	ops.InsertComponent(title, curComponent)
+func (ops *DBOps) UpdateComponent(preComponent, curComponent common.Component) {
+	ops.DeleteComponent(preComponent)
+	ops.InsertComponent(curComponent)
+}
+
+func (ops *DBOps) CreateFile(title, description string) {
+	ctx := context.Background()
+	res, err := ops.GetCli().InsertOne(ctx, bson.M{
+		"title":       title,
+		"description": description,
+		"components":  bson.A{},
+		"lines":       bson.A{},
+	})
+	if err != nil {
+		Logger.Error("create file", zap.Error(err),
+			zap.Any("title", title),
+			zap.Any("description", description))
+	}
+	Logger.Info("Successfully create file. ",
+		zap.Any("Object id ", res.InsertedID))
+	ops.InsertId = res.InsertedID
 }

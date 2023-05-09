@@ -1,7 +1,6 @@
 package http_server
 
 import (
-	"database/sql"
 	"eda/src/config"
 	"eda/src/dbops"
 	"eda/src/edaPkg"
@@ -16,7 +15,6 @@ type Server struct {
 	DirConfig   string
 	DBConfig    config.DBConfig
 	DirDBConfig string
-	DB          *sql.DB
 	EdaPkg      edaPkg.EdaPkg
 }
 
@@ -25,7 +23,6 @@ var Logger = zaplog.Logger
 func (server *Server) Init() {
 	server.DBConfig.LoadXMLDBConfig(server.DirDBConfig)
 	server.Config.LoadXMLConfig(server.DirConfig)
-	server.DB = server.DBConfig.ConnDB()
 
 	dbConfigInfo0 := server.DBConfig.DbBase
 

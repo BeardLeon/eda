@@ -8,6 +8,6 @@
         <ip_address>localhost</ip_address>
         <port>27017</port>
         <db_name>eda</db_name>
-        <table_name>file</table_name>
+        <table_name>final</table_name>
     </db_base>
 </db_config>

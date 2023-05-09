@@ -1,4 +1,4 @@
-package src
+package main
 
 import (
 	server "eda/src/http_server"
