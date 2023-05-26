@@ -1,8 +1,9 @@
 package dbops
 
 import (
-	"eda/src/edaPkg"
+	"eda/src/common"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"testing"
 )
 
@@ -18,46 +19,46 @@ func TestInit(t *testing.T) {
 }
 
 func TestInsertLine(t *testing.T) {
-	line := edaPkg.Line{
+	line := common.Line{
 		StartX: 2,
 		StartY: 2,
 		EndX:   2,
 		EndY:   2,
 	}
-	dbops.InsertLine("GoodTitle", line)
+	dbops.InsertLine(line)
 }
 
 func TestDeleteLine(t *testing.T) {
-	line := edaPkg.Line{
+	line := common.Line{
 		StartX: 2,
 		StartY: 2,
 		EndX:   2,
 		EndY:   2,
 	}
-	dbops.DeleteLine("GoodTitle", line)
+	dbops.DeleteLine(line)
 }
 
 func TestUpdateLine(t *testing.T) {
-	curLine := edaPkg.Line{
+	curLine := common.Line{
 		StartX: 3,
 		StartY: 3,
 		EndX:   3,
 		EndY:   3,
 	}
-	preLine := edaPkg.Line{
+	preLine := common.Line{
 		StartX: 2,
 		StartY: 2,
 		EndX:   2,
 		EndY:   2,
 	}
-	dbops.UpdateLine("GoodTitle", preLine, curLine)
+	dbops.UpdateLine(preLine, curLine)
 }
 
 func TestInsertComponent(t *testing.T) {
-	component := edaPkg.Component{
+	component := common.Component{
 		Id:   8,
 		Name: "Good test name",
-		Shape: []edaPkg.Line{
+		Shape: []common.Line{
 			{StartX: 2,
 				StartY: 2,
 				EndX:   2,
@@ -68,7 +69,7 @@ func TestInsertComponent(t *testing.T) {
 				EndX:   3,
 				EndY:   3},
 		},
-		Pin: []edaPkg.Coordinate{
+		Pin: []common.Coordinate{
 			{X: 0, Y: 0},
 			{X: 3, Y: 3},
 		},
@@ -77,10 +78,10 @@ func TestInsertComponent(t *testing.T) {
 }
 
 func TestDeleteComponent(t *testing.T) {
-	component := edaPkg.Component{
+	component := common.Component{
 		Id:   8,
 		Name: "Good test name",
-		Shape: []edaPkg.Line{
+		Shape: []common.Line{
 			{StartX: 2,
 				StartY: 2,
 				EndX:   2,
@@ -91,7 +92,7 @@ func TestDeleteComponent(t *testing.T) {
 				EndX:   3,
 				EndY:   3},
 		},
-		Pin: []edaPkg.Coordinate{
+		Pin: []common.Coordinate{
 			{X: 0, Y: 0},
 			{X: 3, Y: 3},
 		},
@@ -100,10 +101,10 @@ func TestDeleteComponent(t *testing.T) {
 }
 
 func TestUpdateComponent(t *testing.T) {
-	preComponent := edaPkg.Component{
+	preComponent := common.Component{
 		Id:   8,
 		Name: "Good test name",
-		Shape: []edaPkg.Line{
+		Shape: []common.Line{
 			{StartX: 2,
 				StartY: 2,
 				EndX:   2,
@@ -114,15 +115,15 @@ func TestUpdateComponent(t *testing.T) {
 				EndX:   3,
 				EndY:   3},
 		},
-		Pin: []edaPkg.Coordinate{
+		Pin: []common.Coordinate{
 			{X: 0, Y: 0},
 			{X: 4, Y: 4},
 		},
 	}
-	curComponent := edaPkg.Component{
+	curComponent := common.Component{
 		Id:   8,
 		Name: "Good test name",
-		Shape: []edaPkg.Line{
+		Shape: []common.Line{
 			{StartX: 2,
 				StartY: 2,
 				EndX:   2,
@@ -133,7 +134,7 @@ func TestUpdateComponent(t *testing.T) {
 				EndX:   3,
 				EndY:   3},
 		},
-		Pin: []edaPkg.Coordinate{
+		Pin: []common.Coordinate{
 			{X: 5, Y: 5},
 			{X: 4, Y: 4},
 		},
@@ -148,10 +149,10 @@ func TestCreateFile(t *testing.T) {
 func TestDBOps(t *testing.T) {
 	dbops.Init(dataSourceName, "eda", coll)
 	dbops.CreateFile("soso title", "this is a soso desc")
-	component := edaPkg.Component{
+	component := common.Component{
 		Id:   8,
 		Name: "Good test name",
-		Shape: []edaPkg.Line{
+		Shape: []common.Line{
 			{StartX: 2,
 				StartY: 2,
 				EndX:   2,
@@ -162,18 +163,29 @@ func TestDBOps(t *testing.T) {
 				EndX:   3,
 				EndY:   3},
 		},
-		Pin: []edaPkg.Coordinate{
+		Pin: []common.Coordinate{
 			{X: 0, Y: 0},
 			{X: 3, Y: 3},
 		},
 	}
 	dbops.InsertComponent(component)
 
-	line := edaPkg.Line{
+	line := common.Line{
 		StartX: 2,
 		StartY: 2,
 		EndX:   2,
 		EndY:   2,
 	}
-	dbops.InsertLine("GoodTitle", line)
+	dbops.InsertLine(line)
+}
+
+func TestMarshal(t *testing.T) {
+	line := common.Line{
+		StartX: 2,
+		StartY: 2,
+		EndX:   2,
+		EndY:   2,
+	}
+	res, _ := bson.MarshalExtJSON(line, false, false)
+	fmt.Println(string(res))
 }

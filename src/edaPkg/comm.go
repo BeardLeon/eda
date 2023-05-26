@@ -20,21 +20,29 @@ type EdaPkg struct {
 }
 
 var Logger = zaplog.Logger
-var db = dbops.DBOps{}
+var db = dbops.DbOps
 
 func (pkg *EdaPkg) New() {
 }
 
 // ImportJsonFile need name and file
 func (pkg *EdaPkg) ImportJsonFile(w http.ResponseWriter, r *http.Request) error {
-	// TODO add string to db
-	fmt.Println()
+	//title := r.PostForm.Get("title")
+
+	//fmt.Println()
 	return nil
 }
 
 // ExportJsonFile export name and file
 func (pkg *EdaPkg) ExportJsonFile(w http.ResponseWriter, r *http.Request) error {
 	return nil
+}
+
+func (pkg *EdaPkg) CreateFile(w http.ResponseWriter, r *http.Request) {
+	title := r.PostForm.Get("title")
+	desc := r.PostForm.Get("desc")
+	id := db.CreateFile(title, desc)
+	w.Write([]byte(id))
 }
 
 func (pkg *EdaPkg) InsertComponent(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +64,7 @@ func (pkg *EdaPkg) InsertLine(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Logger.Error("insert line ioutil.ReadAll error", zap.Error(err))
 	}
+	fmt.Println("r.Body: ", string(res))
 	err = bson.Unmarshal(res, &line)
 	if err != nil {
 		Logger.Error("insert line bson.Unmarshal error", zap.Error(err))

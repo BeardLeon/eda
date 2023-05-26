@@ -10,8 +10,8 @@ type Component struct {
 type Line struct {
 	StartX int `bson:"sx"`
 	StartY int `bson:"sy"`
-	EndX   int `bson:"tx"`
-	EndY   int `bson:"ty"`
+	EndX   int `bson:"ex"`
+	EndY   int `bson:"ey"`
 }
 type Coordinate struct {
 	X int `bson:"x"`

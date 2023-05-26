@@ -16,6 +16,7 @@ type Server struct {
 	DBConfig    config.DBConfig
 	DirDBConfig string
 	EdaPkg      edaPkg.EdaPkg
+	DBOps       dbops.DBOps
 }
 
 var Logger = zaplog.Logger
@@ -26,12 +27,10 @@ func (server *Server) Init() {
 
 	dbConfigInfo0 := server.DBConfig.DbBase
 
-	var dbOps dbops.DBOps
 	dataSourceName := fmt.Sprintf("%s://%s:%s", dbConfigInfo0.DBType,
 		dbConfigInfo0.IPAddress, dbConfigInfo0.Port)
 
-	dbOps.Init(dataSourceName, dbConfigInfo0.DBName, dbConfigInfo0.TableName)
-
+	server.DBOps.Init(dataSourceName, dbConfigInfo0.DBName, dbConfigInfo0.TableName)
 }
 
 func (server *Server) RegisterHttpHandler() {
@@ -41,6 +40,7 @@ func (server *Server) RegisterHttpHandler() {
 		"/export":    server.exportJsonFile,
 		"/line":      server.line,
 		"/component": server.component,
+		"/file":      server.createFile,
 	}
 	for k := range requestHandlers {
 		http.HandleFunc(k, requestHandlers[k])
@@ -55,6 +55,11 @@ func (server *Server) importJsonFile(writer http.ResponseWriter, req *http.Reque
 func (server *Server) exportJsonFile(writer http.ResponseWriter, req *http.Request) {
 	Logger.Info("exportJsonFile()", zap.Any("http.Request", *req))
 	server.EdaPkg.ExportJsonFile(writer, req)
+}
+
+func (server *Server) createFile(writer http.ResponseWriter, req *http.Request) {
+	Logger.Info("createFile()", zap.Any("http.Request", &req))
+	server.EdaPkg.CreateFile(writer, req)
 }
 
 func (server *Server) line(writer http.ResponseWriter, req *http.Request) {

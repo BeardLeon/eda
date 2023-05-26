@@ -5,6 +5,7 @@ import (
 	"eda/src/common"
 	"eda/src/config"
 	"eda/src/zaplog"
+	"fmt"
 	"github.com/qiniu/qmgo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
@@ -29,6 +30,12 @@ type DBOps struct {
 	DBConfig *config.DBConfig
 }
 
+var DbOps = DBOps{}
+
+func (ops *DBOps) New(dbOps DBOps) {
+	ops.cli = dbOps.cli
+}
+
 func (ops *DBOps) Init(dataSourceName string, database string,
 	collection string) {
 	Logger.Debug("", zap.String("dataSourceName", dataSourceName),
@@ -43,6 +50,7 @@ func (ops *DBOps) Init(dataSourceName string, database string,
 	}
 	ops.cli = cli
 	dbConfigInfo.EdaTableName = collection
+	DbOps.cli = cli
 }
 
 func (ops *DBOps) GetCli() *qmgo.QmgoClient {
@@ -119,7 +127,7 @@ func (ops *DBOps) UpdateComponent(preComponent, curComponent common.Component) {
 	ops.InsertComponent(curComponent)
 }
 
-func (ops *DBOps) CreateFile(title, description string) {
+func (ops *DBOps) CreateFile(title, description string) string {
 	ctx := context.Background()
 	res, err := ops.GetCli().InsertOne(ctx, bson.M{
 		"title":       title,
@@ -134,5 +142,17 @@ func (ops *DBOps) CreateFile(title, description string) {
 	}
 	Logger.Info("Successfully create file. ",
 		zap.Any("Object id ", res.InsertedID))
-	ops.InsertId = res.InsertedID
+	//ops.InsertId = res.InsertedID
+	return fmt.Sprintf("%v", res.InsertedID)
+}
+
+func (ops *DBOps) ImportFile(title string, file []byte) {
+	ctx := context.Background()
+	isExist := ops.GetCli().Find(ctx, bson.M{
+		"title": title,
+	})
+	if cnt, _ := isExist.Count(); cnt != 0 {
+		Logger.Info("Please rename file. ")
+		return
+	}
 }
