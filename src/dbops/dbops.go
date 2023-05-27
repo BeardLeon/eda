@@ -30,6 +30,14 @@ type DBOps struct {
 	DBConfig *config.DBConfig
 }
 
+type File struct {
+	Id          string             `bson:"_id"`
+	Title       string             `bson:"title"`
+	Description string             `bson:"description"`
+	Components  []common.Component `bson:"components"`
+	Lines       []common.Line      `bson:"lines"`
+}
+
 func (ops *DBOps) Init(dataSourceName string, database string,
 	collection string) {
 	Logger.Debug("", zap.String("dataSourceName", dataSourceName),
@@ -118,6 +126,16 @@ func (ops *DBOps) DeleteComponent(component common.Component) {
 func (ops *DBOps) UpdateComponent(preComponent, curComponent common.Component) {
 	ops.DeleteComponent(preComponent)
 	ops.InsertComponent(curComponent)
+}
+
+func (ops *DBOps) GetFile(oid string) File {
+	ctx := context.Background()
+	var file File
+	err := ops.GetCli().Find(ctx, bson.M{"_id": oid}).One(&file)
+	if err != nil {
+		Logger.Error("GetFile Find error", zap.Error(err))
+	}
+	return file
 }
 
 func (ops *DBOps) CreateFile(title, description string) string {

@@ -7,19 +7,24 @@ nohup go run src/eda_main.go > server.log 2>&1 &
 ```
 
 ## CreateFile
-''' 
+``` 
 curl -H "Content-type: application/json" -X POST -d  '
     {
         "title":"post-title",
         "desc":"post-not a good desc"
     }' http://0.0.0.0:9476/file
-'''
+```
+
+## GetFile
+``` 
+curl -H "Content-type: application/json" -X GET http://0.0.0.0:9476/file?oid=81b0ec33
+```
 
 ## InsertComponent
-'''
+```
 curl -H "Content-type: application/json" -X POST -d '
     {   
-        "_id" : "527e38f3",
+        "_id" : "81b0ec33",
         "id": 1,
         "name": "andGate",
         "shape": [
@@ -36,26 +41,26 @@ curl -H "Content-type: application/json" -X POST -d '
           { "x": 250, "y": 50 } 
         ]
     }' http://0.0.0.0:9476/component
-'''
+```
 
 ## InsertLine
-'''
+```
 curl -H "Content-type: application/json" -X POST -d '
     {   
-        "_id" : "527e38f3",
+        "_id" : "81b0ec33",
         "sx": 0, 
         "sy": 2, 
         "ex": 2, 
         "ey": 20 
     }' http://0.0.0.0:9476/line
-'''
+```
 
 ## Updatecomponent
-'''
+```
 curl -H "Content-type: application/json" -X PUT -d '
     [
         {
-            "_id":"527e38f3",
+            "_id":"81b0ec33",
              "id": 1,
             "name": "andGate",
             "shape": [
@@ -73,7 +78,7 @@ curl -H "Content-type: application/json" -X PUT -d '
             ]
         },
         {  
-            "_id":"527e38f3",
+            "_id":"81b0ec33",
              "id": 1,
             "name": "andGate",
             "shape": [
@@ -91,46 +96,46 @@ curl -H "Content-type: application/json" -X PUT -d '
             ]
         }
     ]' http://0.0.0.0:9476/component
-'''
+```
 
 ## UpdateLine
-'''
+```
 curl -H "Content-type: application/json" -X PUT -d '
     [
         {
-            "_id":"527e38f3",
-            "sx":0, 
-            "sy":0, 
-            "ex":0, 
-            "ey":0
+            "_id":"81b0ec33",
+            "sx":2, 
+            "sy":2, 
+            "ex":2, 
+            "ey":20
         },
         {  
-            "_id":"527e38f3",
+            "_id":"81b0ec33",
             "sx":1, 
             "sy":1, 
             "ex":1, 
             "ey":20
         }
     ]' http://0.0.0.0:9476/line
-'''
+```
 
 ## DeleteLine
-'''
+```
 curl -H "Content-type: application/json" -X DELETE -d '
     {   
-        "_id" : "527e38f3",
+        "_id" : "81b0ec33",
         "sx": 1, 
         "sy": 1, 
         "ex": 1, 
         "ey": 20 
     }' http://0.0.0.0:9476/line
-'''
+```
 
 ## DeleteComponent
-'''
+```
 curl -H "Content-type: application/json" -X DELETE -d '
     {  
-        "_id":"527e38f3",
+        "_id":"81b0ec33",
         "id": 1,
         "name": "andGate",
         "shape": [
@@ -147,4 +152,4 @@ curl -H "Content-type: application/json" -X DELETE -d '
             { "x": 110, "y": 110 } 
         ]
     }' http://0.0.0.0:9476/component
-'''
+```

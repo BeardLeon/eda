@@ -40,7 +40,7 @@ func (server *Server) RegisterHttpHandler() {
 		"/export":    server.exportJsonFile,
 		"/line":      server.line,
 		"/component": server.component,
-		"/file":      server.createFile,
+		"/file":      server.file,
 	}
 	for k := range requestHandlers {
 		http.HandleFunc(k, requestHandlers[k])
@@ -57,8 +57,8 @@ func (server *Server) exportJsonFile(writer http.ResponseWriter, req *http.Reque
 	server.EdaPkg.ExportJsonFile(writer, req)
 }
 
-func (server *Server) createFile(writer http.ResponseWriter, req *http.Request) {
-	server.EdaPkg.CreateFile(writer, req)
+func (server *Server) file(writer http.ResponseWriter, req *http.Request) {
+	server.EdaPkg.File(writer, req)
 }
 
 func (server *Server) line(writer http.ResponseWriter, req *http.Request) {

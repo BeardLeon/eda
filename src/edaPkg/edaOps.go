@@ -47,7 +47,12 @@ func RespGen(errCode int, errMsg string) (string, error) {
 	return string(jsonResp), err
 }
 
-func CreateFIleRespGen(fileId string) (string, error) {
+func GetFileRespGen(file dbops.File) (string, error) {
+	jsonResp, err := json.Marshal(file)
+	return string(jsonResp), err
+}
+
+func CreateFileRespGen(fileId string) (string, error) {
 	resp := CreateFileResp{
 		FileId: fileId,
 	}
@@ -75,15 +80,17 @@ func (pkg *EdaPkg) ExportJsonFile(w http.ResponseWriter, r *http.Request) error 
 	return nil
 }
 
+func (pkg *EdaPkg) GetFile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset-UTF-8")
+	oid := r.URL.Query().Get("oid")
+	resp := pkg.db.GetFile(oid)
+	jsonResp, _ := GetFileRespGen(resp)
+	Logger.Info("GetFile", zap.Any("_id", oid))
+	fmt.Fprintf(w, jsonResp+"\n")
+}
+
 func (pkg *EdaPkg) CreateFile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset-UTF-8")
-
-	Logger.Info("createFile()", zap.Any("http.Request", r.Body))
-	if r.Method != "POST" {
-		jsonResp, _ := RespGen(common.K_REQUEST_COMMAND_ERROR, "Invalid HTTP request method")
-		fmt.Fprintf(w, jsonResp+"\n")
-		return
-	}
 	len := r.ContentLength
 	body := make([]byte, len)
 	r.Body.Read(body)
@@ -97,7 +104,7 @@ func (pkg *EdaPkg) CreateFile(w http.ResponseWriter, r *http.Request) {
 	id := pkg.db.CreateFile(req.Title, req.Desc)
 	Logger.Info("CreateFile", zap.Any("_id", id), zap.Any("Title", req.Title),
 		zap.Any("desc", req.Desc))
-	jsonResp, _ := CreateFIleRespGen(id)
+	jsonResp, _ := CreateFileRespGen(id)
 	fmt.Fprintf(w, jsonResp+"\n")
 
 }
@@ -213,6 +220,18 @@ func (pkg *EdaPkg) DeleteLine(w http.ResponseWriter, r *http.Request) {
 	pkg.db.DeleteLine(line)
 	jsonResp, _ := RespGen(0, "Success")
 	fmt.Fprintf(w, jsonResp+"\n")
+}
+
+func (pkg *EdaPkg) File(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodGet {
+		pkg.GetFile(w, req)
+	} else if req.Method == http.MethodPost {
+		pkg.CreateFile(w, req)
+	} else {
+		jsonResp, _ := RespGen(common.K_REQUEST_COMMAND_ERROR, "Not supported request method")
+		fmt.Fprintf(w, jsonResp+"\n")
+		return
+	}
 }
 
 func (pkg *EdaPkg) Line(w http.ResponseWriter, req *http.Request) {

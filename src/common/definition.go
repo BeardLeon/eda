@@ -4,12 +4,12 @@ type Component struct {
 	OId   string       `bson:"_id"`
 	Id    int          `bson:"id"`
 	Name  string       `bson:"name"`
-	Shape []Line       `bson:"shape"`
+	Shape []Line       `bson:"shape,omitempty"`
 	Pin   []Coordinate `bson:"pin"`
 }
 
 type Line struct {
-	OId    string `bson:"_id"`
+	OId    string `bson:"_id,omitempty"`
 	StartX int    `bson:"sx"`
 	StartY int    `bson:"sy"`
 	EndX   int    `bson:"ex"`
