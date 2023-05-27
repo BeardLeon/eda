@@ -6,7 +6,6 @@ import (
 	"eda/src/edaPkg"
 	"eda/src/zaplog"
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -29,8 +28,9 @@ func (server *Server) Init() {
 
 	dataSourceName := fmt.Sprintf("%s://%s:%s", dbConfigInfo0.DBType,
 		dbConfigInfo0.IPAddress, dbConfigInfo0.Port)
-
-	server.DBOps.Init(dataSourceName, dbConfigInfo0.DBName, dbConfigInfo0.TableName)
+	var db dbops.DBOps
+	db.Init(dataSourceName, dbConfigInfo0.DBName, dbConfigInfo0.TableName)
+	server.EdaPkg.New(&db, &server.DBConfig)
 }
 
 func (server *Server) RegisterHttpHandler() {
@@ -48,26 +48,25 @@ func (server *Server) RegisterHttpHandler() {
 }
 
 func (server *Server) importJsonFile(writer http.ResponseWriter, req *http.Request) {
-	Logger.Info("importJsonFile()", zap.Any("http.Request", *req))
+	// Logger.Info("importJsonFile()", zap.Any("http.Request", *req))
 	server.EdaPkg.ImportJsonFile(writer, req)
 }
 
 func (server *Server) exportJsonFile(writer http.ResponseWriter, req *http.Request) {
-	Logger.Info("exportJsonFile()", zap.Any("http.Request", *req))
+	// Logger.Info("exportJsonFile()", zap.Any("http.Request", *req))
 	server.EdaPkg.ExportJsonFile(writer, req)
 }
 
 func (server *Server) createFile(writer http.ResponseWriter, req *http.Request) {
-	Logger.Info("createFile()", zap.Any("http.Request", &req))
 	server.EdaPkg.CreateFile(writer, req)
 }
 
 func (server *Server) line(writer http.ResponseWriter, req *http.Request) {
-	Logger.Info("line()", zap.Any("http.Request", *req))
+	// Logger.Info("line()", zap.Any("http.Request", req))
 	server.EdaPkg.Line(writer, req)
 }
 
 func (server *Server) component(writer http.ResponseWriter, req *http.Request) {
-	Logger.Info("component()", zap.Any("http.Request", *req))
+	// Logger.Info("component()", zap.Any("http.Request", *req))
 	server.EdaPkg.Component(writer, req)
 }

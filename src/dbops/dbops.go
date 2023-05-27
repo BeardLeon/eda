@@ -6,6 +6,7 @@ import (
 	"eda/src/config"
 	"eda/src/zaplog"
 	"fmt"
+
 	"github.com/qiniu/qmgo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
@@ -24,16 +25,9 @@ var dbConfigInfo = DBConfigInfoStruct{
 }
 
 type DBOps struct {
-	InsertId interface{}
-	cli      *qmgo.QmgoClient
+	cli *qmgo.QmgoClient
 	// DBInfo struct
 	DBConfig *config.DBConfig
-}
-
-var DbOps = DBOps{}
-
-func (ops *DBOps) New(dbOps DBOps) {
-	ops.cli = dbOps.cli
 }
 
 func (ops *DBOps) Init(dataSourceName string, database string,
@@ -50,7 +44,6 @@ func (ops *DBOps) Init(dataSourceName string, database string,
 	}
 	ops.cli = cli
 	dbConfigInfo.EdaTableName = collection
-	DbOps.cli = cli
 }
 
 func (ops *DBOps) GetCli() *qmgo.QmgoClient {
@@ -59,7 +52,7 @@ func (ops *DBOps) GetCli() *qmgo.QmgoClient {
 
 func (ops *DBOps) InsertLine(line common.Line) {
 	ctx := context.Background()
-	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": ops.InsertId},
+	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": line.OId},
 		bson.M{"$push": bson.M{"lines": bson.M{
 			"sx": line.StartY,
 			"sy": line.StartY,
@@ -68,13 +61,13 @@ func (ops *DBOps) InsertLine(line common.Line) {
 		}})
 	if err != nil {
 		Logger.Error("insert line", zap.Error(err),
-			zap.Any("_id", ops.InsertId), zap.Any("line", line))
+			zap.Any("_id", line.OId), zap.Any("line", line))
 	}
 }
 
 func (ops *DBOps) DeleteLine(line common.Line) {
 	ctx := context.Background()
-	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": ops.InsertId},
+	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": line.OId},
 		bson.M{"$pull": bson.M{"lines": bson.M{
 			"sx": line.StartY,
 			"sy": line.StartY,
@@ -83,7 +76,7 @@ func (ops *DBOps) DeleteLine(line common.Line) {
 		}})
 	if err != nil {
 		Logger.Error("delete line", zap.Error(err),
-			zap.Any("_id", ops.InsertId), zap.Any("line", line))
+			zap.Any("_id", line.OId), zap.Any("line", line))
 	}
 }
 
@@ -94,7 +87,7 @@ func (ops *DBOps) UpdateLine(preLine, curLine common.Line) {
 
 func (ops *DBOps) InsertComponent(component common.Component) {
 	ctx := context.Background()
-	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": ops.InsertId},
+	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": component.OId},
 		bson.M{"$push": bson.M{"components": bson.M{
 			"id":    component.Id,
 			"name":  component.Name,
@@ -103,13 +96,13 @@ func (ops *DBOps) InsertComponent(component common.Component) {
 		}}})
 	if err != nil {
 		Logger.Error("insert component", zap.Error(err),
-			zap.Any("_id", ops.InsertId), zap.Any("component", component))
+			zap.Any("_id", component.OId), zap.Any("component", component))
 	}
 }
 
 func (ops *DBOps) DeleteComponent(component common.Component) {
 	ctx := context.Background()
-	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": ops.InsertId},
+	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": component.OId},
 		bson.M{"$pull": bson.M{"components": bson.M{
 			"id":    component.Id,
 			"name":  component.Name,
@@ -118,7 +111,7 @@ func (ops *DBOps) DeleteComponent(component common.Component) {
 		}}})
 	if err != nil {
 		Logger.Error("delete component", zap.Error(err),
-			zap.Any("_id", ops.InsertId), zap.Any("component", component))
+			zap.Any("_id", component.OId), zap.Any("component", component))
 	}
 }
 
@@ -129,7 +122,9 @@ func (ops *DBOps) UpdateComponent(preComponent, curComponent common.Component) {
 
 func (ops *DBOps) CreateFile(title, description string) string {
 	ctx := context.Background()
-	res, err := ops.GetCli().InsertOne(ctx, bson.M{
+	id := common.ShordGuidGenerator()
+	_, err := ops.GetCli().InsertOne(ctx, bson.M{
+		"_id":         id,
 		"title":       title,
 		"description": description,
 		"components":  bson.A{},
@@ -141,9 +136,8 @@ func (ops *DBOps) CreateFile(title, description string) string {
 			zap.Any("description", description))
 	}
 	Logger.Info("Successfully create file. ",
-		zap.Any("Object id ", res.InsertedID))
-	//ops.InsertId = res.InsertedID
-	return fmt.Sprintf("%v", res.InsertedID)
+		zap.Any("Object id ", id))
+	return fmt.Sprintf("%v", id)
 }
 
 func (ops *DBOps) ImportFile(title string, file []byte) {

@@ -1,6 +1,7 @@
 package common
 
 type Component struct {
+	OId   string       `bson:"_id"`
 	Id    int          `bson:"id"`
 	Name  string       `bson:"name"`
 	Shape []Line       `bson:"shape"`
@@ -8,10 +9,11 @@ type Component struct {
 }
 
 type Line struct {
-	StartX int `bson:"sx"`
-	StartY int `bson:"sy"`
-	EndX   int `bson:"ex"`
-	EndY   int `bson:"ey"`
+	OId    string `bson:"_id"`
+	StartX int    `bson:"sx"`
+	StartY int    `bson:"sy"`
+	EndX   int    `bson:"ex"`
+	EndY   int    `bson:"ey"`
 }
 type Coordinate struct {
 	X int `bson:"x"`
