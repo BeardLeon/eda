@@ -1,12 +1,12 @@
 
-### USAGE
+## USAGE
 
-## RunServer
+### RunServer
 ```
 nohup go run src/eda_main.go > server.log 2>&1 &
 ```
 
-## CreateFile
+### CreateFile
 ``` 
 curl -H "Content-type: application/json" -X POST -d  '
     {
@@ -15,12 +15,12 @@ curl -H "Content-type: application/json" -X POST -d  '
     }' http://0.0.0.0:9476/file
 ```
 
-## GetFile
+### GetFile
 ``` 
 curl -H "Content-type: application/json" -X GET http://0.0.0.0:9476/file?oid=81b0ec33
 ```
 
-## InsertComponent
+### InsertComponent
 ```
 curl -H "Content-type: application/json" -X POST -d '
     {   
@@ -43,7 +43,7 @@ curl -H "Content-type: application/json" -X POST -d '
     }' http://0.0.0.0:9476/component
 ```
 
-## InsertLine
+### InsertLine
 ```
 curl -H "Content-type: application/json" -X POST -d '
     {   
@@ -55,7 +55,7 @@ curl -H "Content-type: application/json" -X POST -d '
     }' http://0.0.0.0:9476/line
 ```
 
-## Updatecomponent
+### Updatecomponent
 ```
 curl -H "Content-type: application/json" -X PUT -d '
     [
@@ -98,7 +98,7 @@ curl -H "Content-type: application/json" -X PUT -d '
     ]' http://0.0.0.0:9476/component
 ```
 
-## UpdateLine
+### UpdateLine
 ```
 curl -H "Content-type: application/json" -X PUT -d '
     [
@@ -119,7 +119,7 @@ curl -H "Content-type: application/json" -X PUT -d '
     ]' http://0.0.0.0:9476/line
 ```
 
-## DeleteLine
+### DeleteLine
 ```
 curl -H "Content-type: application/json" -X DELETE -d '
     {   
@@ -131,7 +131,7 @@ curl -H "Content-type: application/json" -X DELETE -d '
     }' http://0.0.0.0:9476/line
 ```
 
-## DeleteComponent
+### DeleteComponent
 ```
 curl -H "Content-type: application/json" -X DELETE -d '
     {  
