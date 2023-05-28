@@ -8,11 +8,10 @@ nohup go run src/eda_main.go > server.log 2>&1 &
 
 ### ImportFile
 设置 Content-Type multipart/form-data; boundary=<calculated when request is sent>
-Body中关键字`file`类型File，选择文件
-发送POST请求 ```http://0.0.0.0:9476/import```
+Body中关键字`file`类型File，选择文件, 发送POST请求 ```http://0.0.0.0:9476/import```
 
 ### ExportFile
-浏览器访问```http:/0.0.0.0:9476/export?oid=81b0ec33```
+浏览器访问```http://0.0.0.0:9476/export?oid=81b0ec33```
 
 ### CreateFile
 ``` 
