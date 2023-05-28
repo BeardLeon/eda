@@ -5,6 +5,7 @@ import (
 	"eda/src/common"
 	"eda/src/config"
 	"eda/src/zaplog"
+	"encoding/json"
 	"fmt"
 
 	"github.com/qiniu/qmgo"
@@ -158,13 +159,18 @@ func (ops *DBOps) CreateFile(title, description string) string {
 	return fmt.Sprintf("%v", id)
 }
 
-func (ops *DBOps) ImportFile(title string, file []byte) {
+func (ops *DBOps) ImportFile(content []byte) error {
 	ctx := context.Background()
-	isExist := ops.GetCli().Find(ctx, bson.M{
-		"title": title,
-	})
-	if cnt, _ := isExist.Count(); cnt != 0 {
-		Logger.Info("Please rename file. ")
-		return
+	var file File
+	err := json.Unmarshal(content, &file)
+	if err != nil {
+		Logger.Error("ImportFile json Unmarshal", zap.Error(err))
+		return err
 	}
+	_, err = ops.GetCli().InsertOne(ctx, file)
+	if err != nil {
+		Logger.Error("ImportFile InsertOne", zap.Error(err))
+		return err
+	}
+	return nil
 }

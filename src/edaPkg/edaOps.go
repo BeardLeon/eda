@@ -1,12 +1,14 @@
 package edaPkg
 
 import (
+	"bufio"
 	"eda/src/common"
 	"eda/src/config"
 	"eda/src/dbops"
 	"eda/src/zaplog"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -47,6 +49,11 @@ func RespGen(errCode int, errMsg string) (string, error) {
 	return string(jsonResp), err
 }
 
+func ExportFileRespGen(file dbops.File) (string, error) {
+	jsonResp, err := json.MarshalIndent(file, "", "\t")
+	return string(jsonResp), err
+}
+
 func GetFileRespGen(file dbops.File) (string, error) {
 	jsonResp, err := json.Marshal(file)
 	return string(jsonResp), err
@@ -68,16 +75,49 @@ func (pkg *EdaPkg) New(db *dbops.DBOps, dbConfig *config.DBConfig) {
 }
 
 // ImportJsonFile need name and file
-func (pkg *EdaPkg) ImportJsonFile(w http.ResponseWriter, r *http.Request) error {
-	//title := r.PostForm.Get("title")
-
-	//fmt.Println()
-	return nil
+func (pkg *EdaPkg) ImportJsonFile(w http.ResponseWriter, r *http.Request) {
+	// w.Header().Set("Content-Type", "multipart/form-data;")
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		Logger.Error("ImportJsonFile", zap.Error(err))
+		jsonResp, _ := RespGen(common.K_PARSE_FILE_ERROR, "Form file failed")
+		fmt.Fprintf(w, jsonResp+"\n")
+		return
+	}
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		Logger.Error("ImportJsonFile", zap.Error(err))
+		jsonResp, _ := RespGen(common.K_PARSE_FILE_ERROR, "Read file failed")
+		fmt.Fprintf(w, jsonResp+"\n")
+		return
+	}
+	err = pkg.db.ImportFile(content)
+	if err != nil {
+		Logger.Error("ImportJsonFile", zap.Error(err))
+		return
+	}
+	jsonResp, _ := RespGen(0, "Success")
+	Logger.Info("ImportJsonFile", zap.Any("file", file))
+	fmt.Fprintf(w, jsonResp+"\n")
 }
 
 // ExportJsonFile export name and file
-func (pkg *EdaPkg) ExportJsonFile(w http.ResponseWriter, r *http.Request) error {
-	return nil
+func (pkg *EdaPkg) ExportFile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset-UTF-8")
+	oid := r.URL.Query().Get("oid")
+	file := pkg.db.GetFile(oid)
+	data := fmt.Sprintf("attachment; filename=%s.json", file.Title)
+	w.Header().Set("Content-Disposition", data)
+
+	resp := pkg.db.GetFile(oid)
+
+	writer := bufio.NewWriter(w)
+	jsonResp, _ := ExportFileRespGen(resp)
+	writer.WriteString(jsonResp)
+	writer.Flush()
+	Logger.Info("ExportFile", zap.Any("_id", oid))
+	jsonResp, _ = RespGen(0, "Success")
+	fmt.Fprintf(w, jsonResp+"\n")
 }
 
 func (pkg *EdaPkg) GetFile(w http.ResponseWriter, r *http.Request) {

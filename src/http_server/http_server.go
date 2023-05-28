@@ -36,8 +36,8 @@ func (server *Server) Init() {
 func (server *Server) RegisterHttpHandler() {
 	// All the handler func map for request from client
 	var requestHandlers = map[string]func(http.ResponseWriter, *http.Request){
-		"/import":    server.importJsonFile,
-		"/export":    server.exportJsonFile,
+		"/import":    server.importFile,
+		"/export":    server.exportFile,
 		"/line":      server.line,
 		"/component": server.component,
 		"/file":      server.file,
@@ -47,14 +47,14 @@ func (server *Server) RegisterHttpHandler() {
 	}
 }
 
-func (server *Server) importJsonFile(writer http.ResponseWriter, req *http.Request) {
+func (server *Server) importFile(writer http.ResponseWriter, req *http.Request) {
 	// Logger.Info("importJsonFile()", zap.Any("http.Request", *req))
 	server.EdaPkg.ImportJsonFile(writer, req)
 }
 
-func (server *Server) exportJsonFile(writer http.ResponseWriter, req *http.Request) {
+func (server *Server) exportFile(writer http.ResponseWriter, req *http.Request) {
 	// Logger.Info("exportJsonFile()", zap.Any("http.Request", *req))
-	server.EdaPkg.ExportJsonFile(writer, req)
+	server.EdaPkg.ExportFile(writer, req)
 }
 
 func (server *Server) file(writer http.ResponseWriter, req *http.Request) {

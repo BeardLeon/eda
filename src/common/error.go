@@ -1,3 +1,4 @@
 package common
 
 const K_REQUEST_COMMAND_ERROR = 1001
+const K_PARSE_FILE_ERROR = 1002
