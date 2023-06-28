@@ -98,10 +98,11 @@ func (ops *DBOps) InsertComponent(component common.Component) {
 	ctx := context.Background()
 	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": component.OId},
 		bson.M{"$push": bson.M{"components": bson.M{
-			"id":    component.Id,
-			"name":  component.Name,
-			"shape": component.Shape,
-			"pin":   component.Pin,
+			"id":       component.Id,
+			"name":     component.Name,
+			"shape":    component.Shape,
+			"pin":      component.Pin,
+			"position": component.Position,
 		}}})
 	if err != nil {
 		Logger.Error("insert component", zap.Error(err),
@@ -113,10 +114,11 @@ func (ops *DBOps) DeleteComponent(component common.Component) {
 	ctx := context.Background()
 	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": component.OId},
 		bson.M{"$pull": bson.M{"components": bson.M{
-			"id":    component.Id,
-			"name":  component.Name,
-			"shape": component.Shape,
-			"pin":   component.Pin,
+			"id":       component.Id,
+			"name":     component.Name,
+			"shape":    component.Shape,
+			"pin":      component.Pin,
+			"position": component.Position,
 		}}})
 	if err != nil {
 		Logger.Error("delete component", zap.Error(err),
