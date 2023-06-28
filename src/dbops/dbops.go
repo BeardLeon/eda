@@ -78,7 +78,7 @@ func (ops *DBOps) DeleteLine(line common.Line) {
 	ctx := context.Background()
 	err := ops.GetCli().UpdateOne(ctx, bson.M{"_id": line.OId},
 		bson.M{"$pull": bson.M{"lines": bson.M{
-			"sx": line.StartY,
+			"sx": line.StartX,
 			"sy": line.StartY,
 			"ex": line.EndX,
 			"ey": line.EndY},
